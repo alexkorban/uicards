@@ -1,4 +1,26 @@
-module UiCards exposing (card, cardError, deck, show)
+module UiCards exposing
+    ( card
+    , cardError
+    , deck
+    , show
+    )
+
+{-| This library allows you to lay out pieces of UI on a single page, and to have
+these pieces _actually work_ - responding to clicks, typing and so on.
+
+
+# Defining cards and decks
+
+@docs card
+@docs cardError
+@docs deck
+
+
+# Displaying the cards
+
+@docs show
+
+-}
 
 import Array exposing (Array)
 import Browser exposing (Document, UrlRequest(..))
@@ -101,7 +123,7 @@ init : List (Deck msg model) -> () -> Url -> Nav.Key -> ( Model msg model, Cmd (
 init givenDecks _ givenUrl givenNavKey =
     let
         cardModel =
-            Debug.log "initial card model" Array.fromList <| List.indexedMap toFullDeck givenDecks
+            Array.fromList <| List.indexedMap toFullDeck givenDecks
     in
     ( { internal =
             { isMenuOpen = False
@@ -299,7 +321,9 @@ view givenModel =
                 [ h2 (toAttrs cardHeadingStyles) [ text <| String.toUpper givenCard.name ]
                 , div (toAttrs cardStyles)
                     [ div (toAttrs cardLinerStyles)
-                        [ Html.map (\givenMsg -> CardMsg ( givenCard.index, givenMsg )) <| givenCard.view givenCard.model ]
+                        [ Html.map (\givenMsg -> CardMsg ( givenCard.index, givenMsg )) <|
+                            givenCard.view givenCard.model
+                        ]
                     ]
                 ]
 
@@ -361,7 +385,8 @@ view givenModel =
         body =
             case maybeDeck of
                 Just currDeck ->
-                    [ node "style" [] [ text "html, body { margin: 0; background-color: #f8f7ff }" ] ] ++ viewDeck currDeck
+                    [ node "style" [] [ text "html, body { margin: 0; background-color: #f8f7ff }" ] ]
+                        ++ viewDeck currDeck
 
                 Nothing ->
                     [ h1 [] [ text "Invalid deck index" ] ]
@@ -383,14 +408,38 @@ view givenModel =
 -- PUBLIC API --
 
 
+{-| Define a UI card. As its arguments, the function takes a card title, the initial model
+and a function that takes a model and produces an `Html` value
+
+    card "Menu button" initialMenuModel <|
+        \model ->
+            menuButton model
+
+-}
+card : String -> model -> (model -> Html msg) -> Card msg model
 card =
     Card
 
 
+{-| Combine multiple cards into a deck. One deck will be displayed at a time, and
+all defined decks will be listed in a menu for you to choose which one to show. As its
+arguments, this function takes a deck name followed by a list of cards which comprise the deck.
+
+    deck "Menu deck" [ menuButtonsCard, menuPanelCard, submenuCard ]
+
+-}
+deck : String -> List (Card msg model) -> Deck msg model
 deck =
     Deck
 
 
+{-| Dispay an error instead of card content. This is a helper function, and you are free
+to display any other `Html` value when it isn't possible to render the expected content
+of the card (eg due to the model changing in a way that doesn't make sense).
+
+    cardError "The UI element could not be displayed"
+
+-}
 cardError : String -> Html.Html msg
 cardError givenErr =
     let
@@ -403,6 +452,15 @@ cardError givenErr =
     div (toAttrs errorStyles) [ text givenErr ]
 
 
+{-| Generate a `Browser.application` based on the supplied `update` function and a list of decks.
+
+    main =
+        show App.update
+            [ deck "Deck 1" [ card "Card 1-1" ... ]
+            , deck "Deck 2" [ card "Card 2-1" ...]
+            ]
+
+-}
 show : AppUpdate msg model -> List (Deck msg model) -> Program () (Model msg model) (Msg msg)
 show givenAppUpdate givenDecks =
     Browser.application
