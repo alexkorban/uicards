@@ -378,9 +378,18 @@ view givenModel =
         toNamedUrl givenIndex givenDeck =
             { url = "#" ++ String.fromInt givenIndex, name = givenDeck.name }
 
-        maybeDeck =
+        maybeSelectedDeck =
             givenModel.internal.selectedDeckIndex
                 |> Maybe.andThen (flip Array.get givenModel.decks)
+
+        -- Try to fall back to the first deck if selected index didn't work
+        maybeDeck =
+            case maybeSelectedDeck of
+                Just _ ->
+                    maybeSelectedDeck
+
+                Nothing ->
+                    Array.get 0 givenModel.decks
 
         body =
             case maybeDeck of
@@ -389,7 +398,7 @@ view givenModel =
                         ++ viewDeck currDeck
 
                 Nothing ->
-                    [ h1 [] [ text "Invalid deck index" ] ]
+                    [ h1 [] [ text "Please define at least one deck with cards" ] ]
 
         filledMenuPanel =
             menuPanel <| Array.indexedMap toNamedUrl givenModel.decks
