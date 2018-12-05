@@ -61,7 +61,7 @@ main =
         ]
 ```
 
-The cards file can simply be compiled with `elm make` to produce an HTML file. 
+The cards file can simply be compiled with `elm make` to produce an HTML or JS file. 
 
 For live interactive development, `elm-live` is the easiest option:
 

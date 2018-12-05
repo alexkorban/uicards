@@ -267,7 +267,7 @@ menuPanel givenLinks =
             let
                 linkStyles =
                     [ ( "text-decoration", "none" )
-                    , ( "font-family", "Helvetica, serif" )
+                    , ( "font-family", "Helvetica, sans-serif" )
                     , ( "color", "#292446" )
                     ]
 
@@ -301,7 +301,7 @@ view givenModel =
             , ( "background-color", "#d8d8ff" )
             , ( "color", "#292446" )
             , ( "font-family", "Helvetica, sans-serif" )
-            , ( "font-size", "1em" )
+            , ( "font-size", "16px" )
             , ( "font-weight", "bold" )
             ]
 
@@ -347,7 +347,6 @@ view givenModel =
         deckHeadingStyles =
             [ ( "font-family", "Helvetica, sans-serif" )
             , ( "font-variant", "small-caps" )
-            , ( "letter-spacing", ".1rem" )
             , ( "color", "#292446" )
             , ( "display", "inline-block" )
             , ( "margin", "0" )
@@ -355,14 +354,15 @@ view givenModel =
             ]
 
         menuButtonStyles =
-            [ ( "padding", "10px" )
-            , ( "height", "45px" )
+            [ ( "padding-left", "10px" )
+            , ( "padding-right", "10px" )
+            , ( "height", "48px" )
             , ( "border", "2px solid #b8b8ff" )
             , ( "border-radius", "4px" )
             , ( "background-color", "#f8f7ff" )
             , ( "color", "#292446" )
             , ( "font-weight", "bold" )
-            , ( "font-size", "1.05em" )
+            , ( "font-size", "16px" )
             , ( "float", "right" )
             , ( "box-shadow", "0 0 1px 1px #9381ff" )
             ]
@@ -370,7 +370,7 @@ view givenModel =
         viewDeck givenDeck =
             [ header (toAttrs headerStyles)
                 [ h1 (toAttrs deckHeadingStyles) [ text givenDeck.name ]
-                , button (toAttrs menuButtonStyles ++ [ onClick <| InternalMsg ToggleMenu ]) [ text "Decks" ]
+                , div (toAttrs menuButtonStyles ++ [ onClick <| InternalMsg ToggleMenu ]) [ text "Decks" ]
                 ]
             , viewCards givenDeck.cards
             ]
@@ -391,11 +391,26 @@ view givenModel =
                 Nothing ->
                     Array.get 0 givenModel.decks
 
+        footerStyles =
+            [ ( "text-align", "center" )
+            , ( "width", "100%" )
+            , ( "font-family", "Helvetica, sans-serif" )
+            , ( "font-size", "12px" )
+            , ( "margin-bottom", "10px" )
+            ]
+
+        footer =
+            div (toAttrs footerStyles)
+                [ text "UICards made by "
+                , a [ href "https://korban.net/elm" ] [ Html.text "Alex Korban" ]
+                ]
+
         body =
             case maybeDeck of
                 Just currDeck ->
                     [ node "style" [] [ text "html, body { margin: 0; background-color: #f8f7ff }" ] ]
                         ++ viewDeck currDeck
+                        ++ [ footer ]
 
                 Nothing ->
                     [ h1 [] [ text "Please define at least one deck with cards" ] ]
